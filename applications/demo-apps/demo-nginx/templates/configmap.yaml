@@ -21,4 +21,11 @@ data:
             return 200 "healthy\n";
             add_header Content-Type text/plain;
         }
+        
+        # Custom page to verify deployment
+        location /info {
+            access_log off;
+            return 200 "IDP Demo App - Phase 1 Complete!\n";
+            add_header Content-Type text/plain;
+        }
     }

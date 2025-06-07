@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: nginx
+  repository: nginxinc/nginx-unprivileged
   pullPolicy: IfNotPresent
   tag: "1.25"
 
@@ -23,8 +23,9 @@ resources:
 # Security context (Phase 5 preparation)
 securityContext:
   runAsNonRoot: true
-  runAsUser: 1000
-  fsGroup: 2000
+  runAsUser: 101 # nginx user in unprivileged image
+  runAsGroup: 101
+  fsGroup: 101
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
   capabilities:

@@ -30,12 +30,16 @@ spec:
           protocol: TCP
         livenessProbe:
           httpGet:
-            path: /
+            path: /health
             port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /
+            path: /health
             port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
         securityContext:
@@ -48,6 +52,8 @@ spec:
           mountPath: /tmp
         - name: var-cache-nginx
           mountPath: /var/cache/nginx
+        - name: var-run
+          mountPath: /var/run
       volumes:
       - name: nginx-config
         configMap:
@@ -55,4 +61,6 @@ spec:
       - name: tmp-volume
         emptyDir: {}
       - name: var-cache-nginx
+        emptyDir: {}
+      - name: var-run
         emptyDir: {}
