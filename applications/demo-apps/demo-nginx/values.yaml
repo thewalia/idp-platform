@@ -35,3 +35,14 @@ securityContext:
 # Pod security (Phase 5 preparation)
 podSecurityContext:
   automountServiceAccountToken: false
+
+# ServiceAccount for Vault authentication
+serviceAccount:
+  create: false
+  name: demo-nginx
+
+# External secrets configuration
+externalSecrets:
+  enabled: true
+  configSecretName: demo-nginx-config-secret
+  credsSecretName: demo-nginx-creds-secret

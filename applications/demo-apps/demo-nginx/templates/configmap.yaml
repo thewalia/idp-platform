@@ -25,7 +25,28 @@ data:
         # Custom page to verify deployment
         location /info {
             access_log off;
-            return 200 "IDP Demo App - Phase 1 Complete!\n";
+            return 200 "IDP Demo App - Phase 2 Complete! Vault + ESO Integration Active\n";
+            add_header Content-Type text/plain;
+        }
+        
+        # Secrets info endpoint (for demo purposes)
+        location /secrets-info {
+            access_log off;
+            return 200 "Secrets loaded from Vault via ESO. Check environment variables and /etc/secrets/ for details.\n";
+            add_header Content-Type text/plain;
+        }
+        
+        # Environment info (shows env vars without exposing values)
+        location /env-info {
+            access_log off;
+            return 200 "Environment variables loaded: API_KEY, DATABASE_URL, DEBUG_MODE, USERNAME, PASSWORD\nSecret files mounted at: /etc/secrets/\n";
+            add_header Content-Type text/plain;
+        }
+
+        # Vault connection test endpoint
+        location /vault-status {
+            access_log off;
+            return 200 "Vault Integration Status:\n- SecretStore: vault-backend\n- Namespace: demo-apps\n- Auth Method: kubernetes\n- Secrets: Auto-synced every 30s\n";
             add_header Content-Type text/plain;
         }
     }

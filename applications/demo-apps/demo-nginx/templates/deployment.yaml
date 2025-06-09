@@ -14,9 +14,16 @@ spec:
       annotations:
         # Config checksum for auto-reloading (Phase 3)
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        # Secrets checksum for secret rotation
+        {{- if .Values.externalSecrets.enabled }}
+        checksum/secrets: {{ printf "%s-%s" .Values.externalSecrets.configSecretName .Values.externalSecrets.credsSecretName | sha256sum }}
+        {{- end }}
       labels:
         {{- include "demo-nginx.selectorLabels" . | nindent 8 }}
     spec:
+      {{- if .Values.serviceAccount.name }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- end }}
       automountServiceAccountToken: {{ .Values.podSecurityContext.automountServiceAccountToken }}
       securityContext:
         {{- toYaml .Values.securityContext | nindent 8 }}
@@ -28,6 +35,34 @@ spec:
         - name: http
           containerPort: 8080
           protocol: TCP
+        {{- if .Values.externalSecrets.enabled }}
+        env:
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecrets.configSecretName }}
+              key: API_KEY
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecrets.configSecretName }}
+              key: DATABASE_URL
+        - name: DEBUG_MODE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecrets.configSecretName }}
+              key: DEBUG_MODE
+        - name: USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecrets.credsSecretName }}
+              key: USERNAME
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecrets.credsSecretName }}
+              key: PASSWORD
+        {{- end }}
         livenessProbe:
           httpGet:
             path: /health
@@ -54,6 +89,11 @@ spec:
           mountPath: /var/cache/nginx
         - name: var-run
           mountPath: /var/run
+        {{- if .Values.externalSecrets.enabled }}
+        - name: secret-files
+          mountPath: /etc/secrets
+          readOnly: true
+        {{- end }}
       volumes:
       - name: nginx-config
         configMap:
@@ -64,3 +104,12 @@ spec:
         emptyDir: {}
       - name: var-run
         emptyDir: {}
+      {{- if .Values.externalSecrets.enabled }}
+      - name: secret-files
+        projected:
+          sources:
+          - secret:
+              name: {{ .Values.externalSecrets.configSecretName }}
+          - secret:
+              name: {{ .Values.externalSecrets.credsSecretName }}
+      {{- end }}

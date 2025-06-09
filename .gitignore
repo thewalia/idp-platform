@@ -1,0 +1,39 @@
+# Development and temporary files
+*.tmp
+*.backup
+*.log
+port-forward-*.pid
+
+# Local testing and development
+test-manifests/
+local-values/
+temp/
+.local/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Kubernetes temporary files
+*.kubeconfig
+kubeconfig-*
+
+# Helm temporary files
+charts/*.tgz
+
+# Vault temporary files
+vault-keys.json
+vault-root-token
+.vault-token
