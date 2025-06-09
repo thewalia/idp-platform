@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/theWalia/idp-platform.git
     targetRevision: HEAD
-    path: bootstrap/argocd-apps
+    path: bootstrap/
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
