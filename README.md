@@ -12,8 +12,8 @@ Enterprise-grade Internal Developer Platform built on Kubernetes with GitOps, se
 
 ## Phases
 - [x] Phase 0: Cluster Setup
-- [ ] Phase 1: GitOps Bootstrap
-- [ ] Phase 2: Secure Secret Management
+- [x] Phase 1: GitOps Bootstrap
+- [x] Phase 2: Secure Secret Management
 - [ ] Phase 3: Observability Integration
 - [ ] Phase 4: Developer Portal (Backstage)
 - [ ] Phase 5: Security Hardening
