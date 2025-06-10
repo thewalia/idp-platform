@@ -33,7 +33,7 @@ spec:
   source:
     repoURL: https://github.com/theWalia/idp-platform.git
     targetRevision: HEAD
-    path: bootstrap
+    path: bootstrap/argocd-apps
     directory:
       include: "vault-apps.yaml"
   destination:
