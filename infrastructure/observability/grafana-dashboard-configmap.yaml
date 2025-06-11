@@ -1,0 +1,146 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: idp-platform-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  idp-platform.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "IDP Platform Overview",
+        "tags": ["idp", "platform"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Demo Nginx Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "up{job=\"demo-nginx-monitor\"}",
+                "refId": "A"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "mappings": [
+                  {
+                    "options": {
+                      "0": {
+                        "text": "DOWN",
+                        "color": "red"
+                      },
+                      "1": {
+                        "text": "UP",
+                        "color": "green"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            },
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "id": 2,
+            "title": "ArgoCD Applications Health",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "count(argocd_app_health_status{health_status=\"Healthy\"})",
+                "refId": "A"
+              }
+            ],
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 0
+            }
+          },
+          {
+            "id": 3,
+            "title": "External Secrets Status",
+            "type": "table",
+            "targets": [
+              {
+                "expr": "external_secrets_status",
+                "refId": "A",
+                "format": "table"
+              }
+            ],
+            "gridPos": {
+              "h": 8,
+              "w": 24,
+              "x": 0,
+              "y": 8
+            }
+          },
+          {
+            "id": 4,
+            "title": "Container Memory Usage",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "container_memory_working_set_bytes{namespace=\"demo-nginx\"}",
+                "refId": "A"
+              }
+            ],
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 16
+            }
+          },
+          {
+            "id": 5,
+            "title": "Container CPU Usage",
+            "type": "timeseries",
+            "targets": [
+              {
+                "expr": "rate(container_cpu_usage_seconds_total{namespace=\"demo-nginx\"}[5m])",
+                "refId": "A"
+              }
+            ],
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 16
+            }
+          },
+          {
+            "id": 6,
+            "title": "Application Logs",
+            "type": "logs",
+            "targets": [
+              {
+                "expr": "{namespace=\"demo-nginx\"}",
+                "refId": "A"
+              }
+            ],
+            "gridPos": {
+              "h": 8,
+              "w": 24,
+              "x": 0,
+              "y": 24
+            }
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "5s"
+      }
+    }

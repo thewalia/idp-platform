@@ -16,7 +16,7 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         # Secrets checksum for secret rotation
         {{- if .Values.externalSecrets.enabled }}
-        checksum/secrets: {{ printf "%s-%s" .Values.externalSecrets.configSecretName .Values.externalSecrets.credsSecretName | sha256sum }}
+        secret-rotation-trigger: "v1" # manual trigger
         {{- end }}
       labels:
         {{- include "demo-nginx.selectorLabels" . | nindent 8 }}

@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook-dummy
+  namespace: monitoring
+  labels:
+    app: webhook-dummy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhook-dummy
+  template:
+    metadata:
+      labels:
+        app: webhook-dummy
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      containers:
+      - name: webhook-dummy
+        image: hashicorp/http-echo:latest
+        args:
+          - -listen=:8080
+          - -text=Webhook received from AlertManager at $(date)
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            cpu: 50m
+            memory: 32Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webhook-dummy
+  namespace: monitoring
+  labels:
+    app: webhook-dummy
+spec:
+  selector:
+    app: webhook-dummy
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: webhook

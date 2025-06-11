@@ -1,0 +1,56 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: idp-platform-rules
+  namespace: monitoring
+  labels:
+    app: idp-platform
+    prometheus: kube-prometheus
+    role: alert-rules
+spec:
+  groups:
+  - name: idp-platform.rules
+    rules:
+    # Demo-nginx availability
+    - alert: DemoNginxDown
+      expr: up{job="demo-nginx-monitor"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        service: demo-nginx
+      annotations:
+        summary: "Demo Nginx is down"
+        description: "Demo Nginx has been down for more than 1 minute"
+    
+    # ArgoCD application sync failures
+    - alert: ArgoCDSyncFailure
+      expr: argocd_app_health_status{health_status!="Healthy"} > 0
+      for: 5m
+      labels:
+        severity: warning
+        service: argocd
+      annotations:
+        summary: "ArgoCD application sync failure"
+        description: "ArgoCD application {{ $labels.name }} is not healthy"
+    
+    # External Secrets sync failures
+    - alert: ExternalSecretSyncFailure
+      expr: external_secrets_sync_calls_error > 0
+      for: 2m
+      labels:
+        severity: warning
+        service: external-secrets
+      annotations:
+        summary: "External Secret sync failure"
+        description: "External Secret {{ $labels.name }} sync failed"
+    
+    # High memory usage
+    - alert: HighMemoryUsage
+      expr: (container_memory_working_set_bytes{namespace="demo-nginx"} / container_spec_memory_limit_bytes{namespace="demo-nginx"}) > 0.8
+      for: 5m
+      labels:
+        severity: warning
+        service: demo-nginx
+      annotations:
+        summary: "High memory usage in demo-nginx"
+        description: "Memory usage is above 80% for {{ $labels.pod }}"

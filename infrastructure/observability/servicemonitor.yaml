@@ -1,0 +1,61 @@
+---
+# demo-nginx ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: demo-nginx-monitor
+  namespace: monitoring
+  labels:
+    app: demo-nginx
+spec:
+  selector:
+    matchLabels:
+      app: demo-nginx
+  namespaceSelector:
+    matchNames:
+    - demo-nginx
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+---
+# ArgoCD ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: argocd-metrics
+  namespace: monitoring
+  labels:
+    app: argocd
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: argocd-metrics
+  namespaceSelector:
+    matchNames:
+    - argocd
+  endpoints:
+  - port: metrics
+    interval: 30s
+---
+# Vault ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: vault-metrics
+  namespace: monitoring
+  labels:
+    app: vault
+spec:
+  selector:
+    matchLabels:
+      app: vault
+  namespaceSelector:
+    matchNames:
+    - vault
+  endpoints:
+  - port: http
+    path: /v1/sys/metrics
+    params:
+      format: ['prometheus']
+    interval: 30s

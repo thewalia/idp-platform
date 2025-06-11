@@ -1,0 +1,61 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: demo-nginx-probe
+  namespace: monitoring
+  labels:
+    app: demo-nginx
+spec:
+  prober:
+    url: prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  module: http_2xx
+  targets:
+    staticConfig:
+      static:
+      - http://demo-nginx.demo-nginx.svc.cluster.local/health
+      - http://demo-nginx.demo-nginx.svc.cluster.local/info  
+      - http://demo-nginx.demo-nginx.svc.cluster.local/vault-status
+      labels:
+        service: demo-nginx
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: argocd-probe
+  namespace: monitoring
+  labels:
+    app: argocd
+spec:
+  prober:
+    url: prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  module: http_2xx
+  targets:
+    staticConfig:
+      static:
+      - http://argocd-server.argocd.svc.cluster.local
+      labels:
+        service: argocd
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: vault-probe
+  namespace: monitoring
+  labels:
+    app: vault
+spec:
+  prober:
+    url: prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+    scheme: http
+    path: /probe
+  module: http_2xx
+  targets:
+    staticConfig:
+      static:
+      - http://vault.vault.svc.cluster.local:8200/v1/sys/health
+      labels:
+        service: vault
