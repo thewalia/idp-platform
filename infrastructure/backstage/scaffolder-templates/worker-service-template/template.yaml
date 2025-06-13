@@ -1,0 +1,158 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: worker-service-template
+  title: Worker Service
+  description: Create a background worker service for processing jobs
+  tags:
+    - worker
+    - background
+    - jobs
+    - queue
+  annotations:
+    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/scaffolder-templates/worker-service-template/template.yaml
+spec:
+  owner: development-team
+  type: service
+  parameters:
+    - title: Service Information
+      required:
+        - name
+        - description
+        - owner
+      properties:
+        name:
+          title: Name
+          type: string
+          description: Unique name of the worker service
+          pattern: '^[a-z0-9-]+$'
+          ui:autofocus: true
+          ui:help: 'Use lowercase letters, numbers, and hyphens only'
+        description:
+          title: Description
+          type: string
+          description: Brief description of the worker service
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the service
+          ui:field: OwnerPicker
+          ui:options:
+            allowedKinds:
+              - Group
+              - User
+        system:
+          title: System
+          type: string
+          description: System this service belongs to
+          default: demo-applications
+          enum:
+            - demo-applications
+            - idp-platform
+    - title: Worker Configuration
+      properties:
+        workerType:
+          title: Worker Type
+          type: string
+          description: Type of background worker
+          default: queue-processor
+          enum:
+            - queue-processor
+            - scheduler
+            - data-processor
+            - file-processor
+        concurrency:
+          title: Concurrency
+          type: integer
+          description: Number of concurrent jobs to process
+          default: 5
+          minimum: 1
+          maximum: 20
+        replicas:
+          title: Replicas
+          type: integer
+          description: Number of worker replicas
+          default: 2
+          minimum: 1
+          maximum: 10
+    - title: Resource Configuration
+      properties:
+        resources:
+          title: Resource Requirements
+          type: object
+          properties:
+            cpu:
+              title: CPU Request
+              type: string
+              default: "200m"
+              enum:
+                - "100m"
+                - "200m"
+                - "500m"
+                - "1000m"
+            memory:
+              title: Memory Request
+              type: string
+              default: "256Mi"
+              enum:
+                - "128Mi"
+                - "256Mi"
+                - "512Mi"
+                - "1Gi"
+  steps:
+    - id: template
+      name: Fetch Skeleton + Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+          system: ${{ parameters.system }}
+          workerType: ${{ parameters.workerType }}
+          concurrency: ${{ parameters.concurrency }}
+          replicas: ${{ parameters.replicas }}
+          resources: ${{ parameters.resources }}
+          destination: ${{ parameters.repoUrl | parseRepoUrl }}
+
+    - id: publish
+      name: Publish to GitHub
+      action: publish:github:pull-request
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        title: "Create new worker service: ${{ parameters.name }}"
+        branchName: create-${{ parameters.name }}
+        description: |
+          # New worker service: ${{ parameters.name }}
+          
+          ${{ parameters.description }}
+          
+          This PR creates:
+          - Background worker service
+          - Helm chart for deployment
+          - ArgoCD application definition
+          - Service catalog entry
+          - Health monitoring endpoints
+          
+          Worker Type: ${{ parameters.workerType }}
+          Concurrency: ${{ parameters.concurrency }}
+          Replicas: ${{ parameters.replicas }}
+          
+          Created by Backstage scaffolder.
+        targetPath: .
+
+    - id: register
+      name: Register in Software Catalog
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: '/applications/${{ parameters.name }}/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}

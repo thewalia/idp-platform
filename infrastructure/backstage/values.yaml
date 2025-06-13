@@ -1,0 +1,162 @@
+backstage:
+  enabled: true
+  
+  backstage:
+    image:
+      registry: ghcr.io
+      repository: backstage/backstage
+      tag: "latest"
+      pullPolicy: Always
+    
+    # Security configuration
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      readOnlyRootFilesystem: false
+      runAsNonRoot: true
+      runAsUser: 1001
+      runAsGroup: 1001
+      seccompProfile:
+        type: RuntimeDefault
+    
+    podSecurityContext:
+      fsGroup: 1001
+      runAsNonRoot: true
+      runAsUser: 1001
+      runAsGroup: 1001
+      seccompProfile:
+        type: RuntimeDefault
+    
+    # Resource allocation
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+    
+    # Storage configuration - hostPath for cache persistence
+    extraVolumes:
+      - name: backstage-cache
+        hostPath:
+          path: /var/lib/backstage-cache
+          type: DirectoryOrCreate
+      - name: app-config
+        configMap:
+          name: backstage-app-config
+    
+    extraVolumeMounts:
+      - name: backstage-cache
+        mountPath: /opt/app-root/src/.cache
+      - name: app-config
+        mountPath: /app/
+        subPath: app-config.production.yaml
+        readOnly: true
+    
+    # Environment variables from secrets
+    extraEnvVars:
+      - name: GITHUB_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: backstage-github-secrets
+            key: github-token
+      - name: POSTGRES_HOST
+        value: "backstage-postgresql"
+      - name: POSTGRES_PORT
+        value: "5432"
+      - name: POSTGRES_USER
+        value: "backstage"
+      - name: POSTGRES_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: backstage-db-secrets
+            key: postgres-password
+    
+    # Service account configuration
+    serviceAccount:
+      create: true
+      automountServiceAccountToken: false
+      name: backstage
+      annotations:
+        app.kubernetes.io/managed-by: "Helm"
+    
+    # Health checks
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 7007
+      initialDelaySeconds: 60
+      periodSeconds: 30
+      timeoutSeconds: 10
+      failureThreshold: 3
+    
+    readinessProbe:
+      httpGet:
+        path: /healthz
+        port: 7007
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    
+    # Service configuration
+    service:
+      type: ClusterIP
+      port: 7007
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "7007"
+        prometheus.io/path: "/metrics"
+    
+    # Ingress (disabled for now)
+    ingress:
+      enabled: false
+    
+    # Metrics
+    metrics:
+      serviceMonitor:
+        enabled: true
+        labels:
+          release: prometheus
+        interval: 30s
+        path: /metrics
+
+  # PostgreSQL dependency
+  postgresql:
+    enabled: true
+    auth:
+      username: backstage
+      database: backstage
+      existingSecret: backstage-db-secrets
+      secretKeys:
+        adminPasswordKey: postgres-password
+        userPasswordKey: postgres-password
+    primary:
+      persistence:
+        enabled: true
+        size: 8Gi
+        storageClass: ""
+      resources:
+        requests:
+          memory: "256Mi"
+          cpu: "100m"
+        limits:
+          memory: "512Mi"
+          cpu: "500m"
+      securityContext:
+        enabled: true
+        fsGroup: 1001
+        runAsUser: 1001
+      containerSecurityContext:
+        enabled: true
+        runAsUser: 1001
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault

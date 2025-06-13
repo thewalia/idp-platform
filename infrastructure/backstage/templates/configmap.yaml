@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backstage-app-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "backstage.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  app-config.production.yaml: |
+    app:
+      title: IDP Platform - Developer Portal
+      baseUrl: http://localhost:7007
+      
+    organization:
+      name: IDP Platform
+      
+    backend:
+      baseUrl: http://localhost:7007
+      listen:
+        port: 7007
+        host: 0.0.0.0
+      csp:
+        connect-src: ["'self'", 'http:', 'https:']
+      cors:
+        origin: http://localhost:7007
+        methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+        credentials: true
+      database:
+        client: pg
+        connection:
+          host: ${POSTGRES_HOST}
+          port: ${POSTGRES_PORT}
+          user: ${POSTGRES_USER}
+          password: ${POSTGRES_PASSWORD}
+          database: backstage
+          ssl:
+            require: false
+            rejectUnauthorized: false
+      cache:
+        store: memory
+      
+    integrations:
+      github:
+        - host: github.com
+          token: ${GITHUB_TOKEN}
+          
+    proxy:
+      '/argocd/api':
+        target: http://argocd-server.argocd.svc.cluster.local/api/v1/
+        changeOrigin: true
+        secure: false
+        headers:
+          Cookie: argocd.token=${ARGOCD_TOKEN}
+          
+    techdocs:
+      builder: 'local'
+      generator:
+        runIn: 'local'
+      publisher:
+        type: 'local'
+        
+    auth:
+      environment: development
+      providers:
+        github:
+          development:
+            clientId: ${AUTH_GITHUB_CLIENT_ID}
+            clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+            
+    scaffolder:
+      defaultAuthor:
+        name: IDP Platform Bot
+        email: idp-bot@platform.local
+      defaultCommitMessage: 'Initial commit from Backstage scaffolder'
+      
+    catalog:
+      import:
+        entityFilename: catalog-info.yaml
+        pullRequestBranchName: backstage-integration
+      rules:
+        - allow: [Component, System, API, Resource, Location, User, Group]
+      locations:
+        # Discover services in applications directory
+        - type: url
+          target: https://raw.githubusercontent.com/theWalia/idp-platform/main/infrastructure/backstage/catalog/systems.yaml
+        - type: url
+          target: https://raw.githubusercontent.com/theWalia/idp-platform/main/infrastructure/backstage/catalog/locations.yaml
+        # Auto-discover catalog files in applications
+        - type: github-discovery
+          target: https://github.com/theWalia/idp-platform/applications/demo-apps/*/catalog-info.yaml
+      processors:
+        githubApi:
+          privateToken: ${GITHUB_TOKEN}
+          
+    kubernetes:
+      serviceLocatorMethod:
+        type: 'multiTenant'
+      clusterLocatorMethods:
+        - type: 'config'
+          clusters:
+            - url: https://kubernetes.default.svc
+              name: local-cluster
+              authProvider: 'serviceAccount'
+              skipTLSVerify: true
+              skipMetricsLookup: false
+              
+    argocd:
+      username: admin
+      password: ${ARGOCD_PASSWORD}
+      appLocatorMethods:
+        - type: 'config'
+          instances:
+            - name: argocd
+              url: http://argocd-server.argocd.svc.cluster.local
+              username: admin
+              password: ${ARGOCD_PASSWORD}

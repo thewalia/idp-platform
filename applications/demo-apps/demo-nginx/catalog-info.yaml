@@ -1,0 +1,131 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: demo-nginx
+  description: Demo nginx service showcasing secure defaults and GitOps patterns
+  annotations:
+    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/demo-nginx/catalog-info.yaml
+    backstage.io/managed-by-origin-location: url:https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/demo-nginx/catalog-info.yaml
+    argocd/app-name: demo-nginx
+    argocd/app-namespace: argocd
+    kubernetes.io/service-account-name: demo-nginx
+    vault.io/secrets-path: secret/demo-nginx
+    github.com/project-slug: theWalia/idp-platform
+  tags:
+    - nginx
+    - demo
+    - security
+    - gitops
+  links:
+    - url: https://github.com/theWalia/idp-platform/tree/main/applications/demo-apps/demo-nginx
+      title: Source Code
+      icon: github
+    - url: http://demo-nginx.demo-apps.svc.cluster.local
+      title: Service Endpoint
+      icon: web
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-team
+  system: demo-applications
+  providesApis:
+    - demo-nginx-api
+  dependsOn:
+    - resource:vault-secrets
+    - resource:external-secrets-operator
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: demo-nginx-api
+  description: Demo nginx HTTP API endpoints
+  annotations:
+    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/applications/demo-applications/demo-nginx/catalog-info.yaml
+spec:
+  type: openapi
+  lifecycle: production
+  owner: platform-team
+  system: demo-applications
+  definition: |
+    openapi: 3.0.0
+    info:
+      title: Demo Nginx API
+      version: 1.0.0
+      description: Demo service endpoints for health checks and information
+    paths:
+      /health:
+        get:
+          summary: Health check endpoint
+          responses:
+            '200':
+              description: Service is healthy
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        example: "healthy"
+      /info:
+        get:
+          summary: Service information
+          responses:
+            '200':
+              description: Service information
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      service:
+                        type: string
+                        example: "demo-nginx"
+                      version:
+                        type: string
+                        example: "1.0.0"
+      /vault-status:
+        get:
+          summary: Vault integration status
+          responses:
+            '200':
+              description: Vault connectivity status
+      /secrets-info:
+        get:
+          summary: External secrets information
+          responses:
+            '200':
+              description: Information about loaded secrets
+      /env-info:
+        get:
+          summary: Environment variables information
+          responses:
+            '200':
+              description: Environment configuration details
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: vault-secrets
+  description: Vault secret management system
+  annotations:
+    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/demo-nginx/catalog-info.yaml
+spec:
+  type: vault
+  owner: platform-team
+  system: idp-platform
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: external-secrets-operator
+  description: External Secrets Operator for Kubernetes
+  annotations:
+    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/demo-nginx/catalog-info.yaml
+spec:
+  type: kubernetes-operator
+  owner: platform-team
+  system: idp-platform

@@ -1,0 +1,53 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: idp-platform-applications
+  description: Auto-discovery location for IDP Platform applications
+  annotations:
+    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/catalog/locations.yaml
+spec:
+  targets:
+    - https://raw.githubusercontent.com/theWalia/idp-platform/main/applications/demo-apps/demo-nginx/catalog-info.yaml
+  type: url
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: idp-platform-scaffolder-templates
+  description: Scaffolder templates for creating new services
+  annotations:
+    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/catalog/locations.yaml
+spec:
+  targets:
+    - https://raw.githubusercontent.com/theWalia/idp-platform/main/infrastructure/backstage/scaffolder-templates/service-template/template.yaml
+    - https://raw.githubusercontent.com/theWalia/idp-platform/main/infrastructure/backstage/scaffolder-templates/website-template/template.yaml
+    - https://raw.githubusercontent.com/theWalia/idp-platform/main/infrastructure/backstage/scaffolder-templates/database-service-template/template.yaml
+    - https://raw.githubusercontent.com/theWalia/idp-platform/main/infrastructure/backstage/scaffolder-templates/worker-service-template/template.yaml
+  type: url
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: github-org-discovery
+  description: GitHub organization discovery for automatic service detection
+  annotations:
+    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/catalog/locations.yaml
+spec:
+  targets:
+    - https://github.com/theWalia/idp-platform
+  type: github-discovery
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: platform-docs
+  description: Platform documentation and guides
+  annotations:
+    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/catalog/locations.yaml
+spec:
+  targets:
+    - https://github.com/theWalia/idp-platform/blob/main/docs/
+  type: url
