@@ -48,7 +48,7 @@ data:
           
     proxy:
       '/argocd/api':
-        target: http://argocd-server.argocd.svc.cluster.local/api/v1/
+        target: http://argo-cd-argocd-server.argocd.svc.cluster.local/api/v1/
         changeOrigin: true
         secure: false
         headers:
@@ -64,10 +64,10 @@ data:
     auth:
       environment: development
       providers:
-        github:
+        guest:
           development:
-            clientId: ${AUTH_GITHUB_CLIENT_ID}
-            clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+            enabled: true
+      allowGuestAccess: true
             
     scaffolder:
       defaultAuthor:
@@ -113,6 +113,6 @@ data:
         - type: 'config'
           instances:
             - name: argocd
-              url: http://argocd-server.argocd.svc.cluster.local
+              url: http://argo-cd-argocd-server.argocd.svc.cluster.local
               username: admin
               password: ${ARGOCD_PASSWORD}

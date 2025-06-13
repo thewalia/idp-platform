@@ -82,45 +82,12 @@ backstage:
     annotations:
       app.kubernetes.io/managed-by: "Helm"
 
-  # Health checks
-  livenessProbe:
-    httpGet:
-      path: /healthz
-      port: 7007
-    initialDelaySeconds: 60
-    periodSeconds: 30
-    timeoutSeconds: 10
-    failureThreshold: 3
-
-  readinessProbe:
-    httpGet:
-      path: /healthz
-      port: 7007
-    initialDelaySeconds: 30
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 3
-
-  # Service configuration
   service:
     type: ClusterIP
-    annotations:
-      prometheus.io/scrape: "true"
-      prometheus.io/port: "7007"
-      prometheus.io/path: "/metrics"
 
   # Ingress (disabled for now)
   ingress:
     enabled: false
-
-  # Metrics
-  metrics:
-    serviceMonitor:
-      enabled: true
-      labels:
-        release: prometheus
-      interval: 30s
-      path: /metrics
 
   # PostgreSQL dependency
   postgresql:
