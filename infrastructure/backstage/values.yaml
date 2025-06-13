@@ -104,7 +104,6 @@ backstage:
   # Service configuration
   service:
     type: ClusterIP
-    port: 7007
     annotations:
       prometheus.io/scrape: "true"
       prometheus.io/port: "7007"
