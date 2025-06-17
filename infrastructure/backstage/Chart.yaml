@@ -7,7 +7,7 @@ appVersion: "1.32.0"
 
 dependencies:
   - name: backstage
-    version: "2.5.2"
+    version: "1.11.0"
     repository: https://backstage.github.io/charts
     condition: backstage.enabled
 
