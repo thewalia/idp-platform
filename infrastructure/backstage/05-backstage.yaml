@@ -59,6 +59,39 @@ spec:
       serviceAccountName: backstage
       automountServiceAccountToken: false
       initContainers:
+        # Fix file permissions for non-root user
+        - name: fix-permissions
+          image: ghcr.io/backstage/backstage:latest
+          imagePullPolicy: Always
+          securityContext:
+            # This initContainer runs as root to fix permissions
+            runAsUser: 0
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - CHOWN
+            readOnlyRootFilesystem: false
+            seccompProfile:
+              type: RuntimeDefault
+          command:
+            - sh
+            - -c
+            - |
+              echo "Fixing file permissions for user 1001..."
+              # Change ownership of the entire /app directory to user 1001
+              chown -R 1001:1001 /app
+              # Ensure execute permissions on directories
+              find /app -type d -exec chmod 755 {} \;
+              # Ensure read permissions on files
+              find /app -type f -exec chmod 644 {} \;
+              # Make sure node_modules binaries are executable
+              find /app -path "*/node_modules/.bin/*" -exec chmod 755 {} \; 2>/dev/null || true
+              echo "Permission fix completed successfully"
+          volumeMounts:
+            - name: app-data
+              mountPath: /app
         # Wait for PostgreSQL to be ready
         - name: wait-for-postgres
           image: postgres:15-alpine
@@ -160,10 +193,13 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
           volumeMounts:
+            # Shared app data volume (now with correct permissions)
+            - name: app-data
+              mountPath: /app
             # Cache volume (hostPath)
             - name: backstage-cache
               mountPath: /opt/app-root/src/.cache
-            # App configuration
+            # App configuration (override the default config)
             - name: app-config
               mountPath: /app/app-config.production.yaml
               subPath: app-config.production.yaml
@@ -179,6 +215,9 @@ spec:
               memory: "512Mi"
               cpu: "500m"
       volumes:
+        # Shared volume for app data with correct permissions
+        - name: app-data
+          emptyDir: {}
         - name: backstage-cache
           hostPath:
             path: /var/lib/backstage-cache
