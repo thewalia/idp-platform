@@ -50,10 +50,10 @@ spec:
         checksum/config: "{{ include (print $.Template.BasePath \"/03-configmap.yaml\") . | sha256sum }}"
     spec:
       securityContext:
-        fsGroup: 1001
+        fsGroup: 1000
         runAsNonRoot: true
-        runAsUser: 1001
-        runAsGroup: 1001
+        runAsUser: 1000
+        runAsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
       serviceAccountName: backstage
@@ -70,25 +70,63 @@ spec:
                 - ALL
             readOnlyRootFilesystem: false
             runAsNonRoot: true
-            runAsUser: 1001
-            runAsGroup: 1001
+            runAsUser: 1000
+            runAsGroup: 1000
             seccompProfile:
               type: RuntimeDefault
           command:
             - sh
             - -c
             - |
-              echo "Copying Backstage app files to writable volume..."
-              # Copy the entire /app directory contents to the shared volume
-              # The fsGroup: 1001 at pod level ensures proper ownership
-              cp -rp /app/* /app-writeable/ 2>/dev/null || true
-              cp -rp /app/.* /app-writeable/ 2>/dev/null || true
+              set -e
+              echo "Starting Backstage app files copy process..."
+              
+              # Check source directory
+              echo "Source directory contents:"
+              ls -la /app/ || echo "Cannot list /app directory"
+              
+              # Ensure target directory exists and is writable
+              echo "Creating target directory structure..."
+              mkdir -p /app-writeable
+              
+              # Test write permissions
+              echo "Testing write permissions..."
+              touch /app-writeable/test-file && rm /app-writeable/test-file
+              echo "✅ Write permissions confirmed"
+              
+              # Copy files more safely
+              echo "Copying application files..."
+              cd /app
+              
+              # Copy files and directories, handling errors gracefully
+              for item in *; do
+                if [ -e "$item" ]; then
+                  echo "Copying: $item"
+                  cp -r "$item" /app-writeable/ || {
+                    echo "⚠️  Warning: Failed to copy $item, continuing..."
+                  }
+                fi
+              done
+              
+              # Copy hidden files separately
+              for item in .[^.]*; do
+                if [ -e "$item" ] && [ "$item" != "." ] && [ "$item" != ".." ]; then
+                  echo "Copying hidden: $item"
+                  cp -r "$item" /app-writeable/ || {
+                    echo "⚠️  Warning: Failed to copy $item, continuing..."
+                  }
+                fi
+              done
               
               # Verify critical files exist
-              if [ -d "/app-writeable/packages/backend" ]; then
-                echo "✅ Backend packages copied successfully"
+              echo "Verifying copied files..."
+              ls -la /app-writeable/
+              
+              if [ -d "/app-writeable/packages" ]; then
+                echo "✅ Packages directory copied"
+                ls -la /app-writeable/packages/
               else
-                echo "❌ Backend packages not found!"
+                echo "❌ Packages directory missing!"
                 exit 1
               fi
               
@@ -96,11 +134,10 @@ spec:
                 echo "✅ Package.json found"
               else
                 echo "❌ Package.json not found!"
-                exit 1  
+                exit 1
               fi
               
-              echo "File copy completed successfully"
-              ls -la /app-writeable/
+              echo "✅ File copy completed successfully"
           volumeMounts:
             - name: app-data
               mountPath: /app-writeable
@@ -115,7 +152,7 @@ spec:
                 - ALL
             readOnlyRootFilesystem: true
             runAsNonRoot: true
-            runAsUser: 1001
+            runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
           command:
@@ -147,8 +184,8 @@ spec:
                 - ALL
             readOnlyRootFilesystem: false
             runAsNonRoot: true
-            runAsUser: 1001
-            runAsGroup: 1001
+            runAsUser: 1000
+            runAsGroup: 1000
             seccompProfile:
               type: RuntimeDefault
           ports:
@@ -205,7 +242,7 @@ spec:
             timeoutSeconds: 3
             failureThreshold: 3
           volumeMounts:
-            # Shared app data volume (now with correct permissions)
+            # Shared app data volume
             - name: app-data
               mountPath: /app
             # Cache volume (hostPath)
