@@ -1,31 +1,36 @@
+# File: applications/demo-apps/demo-nginx/catalog-info.yaml
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: demo-nginx
-  description: Demo nginx service showcasing secure defaults and GitOps patterns
+  description: Demo NGINX application with secure defaults and GitOps deployment
   annotations:
-    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/demo-nginx/catalog-info.yaml
-    backstage.io/managed-by-origin-location: url:https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/demo-nginx/catalog-info.yaml
+    # GitHub repository
+    github.com/project-slug: theWalia/idp-platform
+    
+    # ArgoCD application - scaffolder-created apps only
     argocd/app-name: demo-nginx
     argocd/app-namespace: argocd
-    kubernetes.io/service-account-name: demo-nginx
-    vault.io/secrets-path: secret/demo-nginx
-    github.com/project-slug: theWalia/idp-platform
+    
+    # Kubernetes deployment info - correct namespace
+    backstage.io/kubernetes-id: demo-nginx
+    backstage.io/kubernetes-namespace: demo-apps
+    
+    # Prometheus metrics
+    prometheus.io/rule: container_cpu_usage_seconds_total{namespace="demo-apps",pod=~"demo-nginx-.*"}
+    
+  labels:
+    environment: development
+    tier: frontend
+    type: demo
   tags:
     - nginx
     - demo
-    - security
+    - security-hardened
     - gitops
-  links:
-    - url: https://github.com/theWalia/idp-platform/tree/main/applications/demo-apps/demo-nginx
-      title: Source Code
-      icon: github
-    - url: http://demo-nginx.demo-apps.svc.cluster.local
-      title: Service Endpoint
-      icon: web
 spec:
   type: service
-  lifecycle: production
+  lifecycle: experimental
   owner: platform-team
   system: demo-applications
   providesApis:
@@ -33,26 +38,25 @@ spec:
   dependsOn:
     - resource:vault-secrets
     - resource:external-secrets-operator
-
 ---
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
   name: demo-nginx-api
-  description: Demo nginx HTTP API endpoints
-  annotations:
-    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/applications/demo-applications/demo-nginx/catalog-info.yaml
+  description: Demo NGINX HTTP API endpoints
 spec:
   type: openapi
-  lifecycle: production
+  lifecycle: experimental
   owner: platform-team
   system: demo-applications
   definition: |
     openapi: 3.0.0
     info:
-      title: Demo Nginx API
+      title: Demo NGINX API
       version: 1.0.0
-      description: Demo service endpoints for health checks and information
+      description: Demo application endpoints
+    servers:
+      - url: http://demo-nginx.demo-apps.svc.cluster.local
     paths:
       /health:
         get:
@@ -60,72 +64,35 @@ spec:
           responses:
             '200':
               description: Service is healthy
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    properties:
-                      status:
-                        type: string
-                        example: "healthy"
       /info:
         get:
-          summary: Service information
+          summary: Application info
           responses:
             '200':
-              description: Service information
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    properties:
-                      service:
-                        type: string
-                        example: "demo-nginx"
-                      version:
-                        type: string
-                        example: "1.0.0"
+              description: Application information
       /vault-status:
         get:
-          summary: Vault integration status
+          summary: Vault connection status
           responses:
             '200':
               description: Vault connectivity status
-      /secrets-info:
-        get:
-          summary: External secrets information
-          responses:
-            '200':
-              description: Information about loaded secrets
-      /env-info:
-        get:
-          summary: Environment variables information
-          responses:
-            '200':
-              description: Environment configuration details
-
 ---
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: vault-secrets
-  description: Vault secret management system
-  annotations:
-    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/demo-nginx/catalog-info.yaml
+  description: Vault-managed secrets for demo applications
 spec:
-  type: vault
+  type: database
   owner: platform-team
   system: idp-platform
-
 ---
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: external-secrets-operator
-  description: External Secrets Operator for Kubernetes
-  annotations:
-    backstage.io/managed-by-location: url:https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/demo-nginx/catalog-info.yaml
+  description: External Secrets Operator for secret synchronization
 spec:
-  type: kubernetes-operator
+  type: service
   owner: platform-team
   system: idp-platform

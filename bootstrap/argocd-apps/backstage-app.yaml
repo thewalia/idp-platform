@@ -4,12 +4,10 @@ metadata:
   name: backstage-platform
   namespace: argocd
   labels:
-    app.kubernetes.io/name: backstage
+    app.kubernetes.io/name: backstage-platform
     app.kubernetes.io/part-of: idp-platform
   finalizers:
     - resources-finalizer.argocd.argoproj.io
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   project: default
   source:
@@ -23,22 +21,22 @@ spec:
     automated:
       prune: true
       selfHeal: true
-      allowEmpty: false
     syncOptions:
       - CreateNamespace=true
-      - PrunePropagationPolicy=foreground
     retry:
-      limit: 5
+      limit: 3
       backoff:
         duration: 5s
         factor: 2
         maxDuration: 3m
   ignoreDifferences:
-    - group: apps
-      kind: Deployment
-      jsonPointers:
-        - /spec/replicas
     - group: ""
-      kind: ConfigMap
+      kind: Secret
+      name: backstage-github-secrets
+      jsonPointers:
+        - /data
+    - group: ""
+      kind: Secret
+      name: backstage-db-secrets
       jsonPointers:
         - /data

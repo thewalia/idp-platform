@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backstage
+  labels:
+    name: backstage
+    app.kubernetes.io/name: backstage
+    app.kubernetes.io/part-of: idp-platform
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/warn: baseline
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backstage
+  namespace: backstage
+  labels:
+    app.kubernetes.io/name: backstage
+    app.kubernetes.io/part-of: idp-platform
+  annotations:
+    app.kubernetes.io/managed-by: ArgoCD
+automountServiceAccountToken: false
+---
+# ClusterRole for ArgoCD integration (read-only access to ArgoCD apps)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: backstage-argocd-reader
+  labels:
+    app.kubernetes.io/name: backstage
+    app.kubernetes.io/part-of: idp-platform
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["applications", "appprojects"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["get", "list"]
+    resourceNames: []
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: backstage-argocd-reader
+  labels:
+    app.kubernetes.io/name: backstage
+    app.kubernetes.io/part-of: idp-platform
+subjects:
+  - kind: ServiceAccount
+    name: backstage
+    namespace: backstage
+roleRef:
+  kind: ClusterRole
+  name: backstage-argocd-reader
+  apiGroup: rbac.authorization.k8s.io
