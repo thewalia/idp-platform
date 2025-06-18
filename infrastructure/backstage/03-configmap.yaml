@@ -42,9 +42,7 @@ data:
           user: ${POSTGRES_USER}
           password: ${POSTGRES_PASSWORD}
           database: backstage
-          ssl:
-            require: false
-            rejectUnauthorized: false
+          ssl: false
       cache:
         store: memory
 
