@@ -59,39 +59,51 @@ spec:
       serviceAccountName: backstage
       automountServiceAccountToken: false
       initContainers:
-        # Fix file permissions for non-root user
-        - name: fix-permissions
+        # Copy app files with correct ownership using fsGroup
+        - name: copy-app-files
           image: ghcr.io/backstage/backstage:latest
           imagePullPolicy: Always
           securityContext:
-            # This initContainer runs as root to fix permissions
-            runAsUser: 0
             allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
-              add:
-                - CHOWN
             readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
             seccompProfile:
               type: RuntimeDefault
           command:
             - sh
             - -c
             - |
-              echo "Fixing file permissions for user 1001..."
-              # Change ownership of the entire /app directory to user 1001
-              chown -R 1001:1001 /app
-              # Ensure execute permissions on directories
-              find /app -type d -exec chmod 755 {} \;
-              # Ensure read permissions on files
-              find /app -type f -exec chmod 644 {} \;
-              # Make sure node_modules binaries are executable
-              find /app -path "*/node_modules/.bin/*" -exec chmod 755 {} \; 2>/dev/null || true
-              echo "Permission fix completed successfully"
+              echo "Copying Backstage app files to writable volume..."
+              # Copy the entire /app directory contents to the shared volume
+              # The fsGroup: 1001 at pod level ensures proper ownership
+              cp -rp /app/* /app-writeable/ 2>/dev/null || true
+              cp -rp /app/.* /app-writeable/ 2>/dev/null || true
+              
+              # Verify critical files exist
+              if [ -d "/app-writeable/packages/backend" ]; then
+                echo "✅ Backend packages copied successfully"
+              else
+                echo "❌ Backend packages not found!"
+                exit 1
+              fi
+              
+              if [ -f "/app-writeable/package.json" ]; then
+                echo "✅ Package.json found"
+              else
+                echo "❌ Package.json not found!"
+                exit 1  
+              fi
+              
+              echo "File copy completed successfully"
+              ls -la /app-writeable/
           volumeMounts:
             - name: app-data
-              mountPath: /app
+              mountPath: /app-writeable
         # Wait for PostgreSQL to be ready
         - name: wait-for-postgres
           image: postgres:15-alpine
