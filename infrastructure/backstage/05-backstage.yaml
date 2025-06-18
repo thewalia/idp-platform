@@ -81,8 +81,8 @@ spec:
                 - ALL
             readOnlyRootFilesystem: false
             runAsNonRoot: true
-            runAsUser: 1001
-            runAsGroup: 1001
+            runAsUser: 1000
+            runAsGroup: 1000
             seccompProfile:
               type: RuntimeDefault
           command:
@@ -163,7 +163,7 @@ spec:
                 - ALL
             readOnlyRootFilesystem: true
             runAsNonRoot: true
-            runAsUser: 1001
+            runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
           command:
@@ -195,8 +195,8 @@ spec:
                 - ALL
             readOnlyRootFilesystem: false
             runAsNonRoot: true
-            runAsUser: 1001
-            runAsGroup: 1001
+            runAsUser: 1000
+            runAsGroup: 1000
             seccompProfile:
               type: RuntimeDefault
           ports:
