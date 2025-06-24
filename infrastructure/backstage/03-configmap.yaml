@@ -100,7 +100,8 @@ data:
 
     auth:
       environment: development
-      providers: {}
+      providers:
+        guest: {}
 
     proxy:
       '/argocd/api':
