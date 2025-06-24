@@ -58,7 +58,6 @@ spec:
       name: Publish
       action: publish:github
       input:
-        allowedHosts: ['github.com']
         description: This is ${{ parameters.name }}
         repoUrl: github.com?repo=idp-platform&owner=theWalia
         sourcePath: applications/demo-apps/${{ parameters.name }}

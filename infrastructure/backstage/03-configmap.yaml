@@ -63,6 +63,8 @@ data:
         name: IDP Platform
         email: idp@example.com
       defaultCommitMessage: 'Initial commit from Backstage scaffolder'
+      allowedHosts:
+        - github.com
 
     catalog:
       readonly: false
