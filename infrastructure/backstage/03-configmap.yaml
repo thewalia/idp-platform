@@ -100,8 +100,13 @@ data:
 
     auth:
       environment: development
+      session:
+        secret: ${AUTH_SESSION_SECRET}
       providers:
         guest: {}
+
+    permission:
+      enabled: false
 
     proxy:
       '/argocd/api':

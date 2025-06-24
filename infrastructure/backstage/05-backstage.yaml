@@ -239,6 +239,11 @@ spec:
                 secretKeyRef:
                   name: backstage-argocd-secrets
                   key: auth-token
+            - name: AUTH_SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: backstage-auth-secrets
+                  key: session-secret
           livenessProbe:
             httpGet:
               path: /healthcheck
