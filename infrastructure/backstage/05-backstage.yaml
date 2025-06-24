@@ -244,6 +244,16 @@ spec:
                 secretKeyRef:
                   name: backstage-auth-secrets
                   key: session-secret
+            - name: GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backstage-github-secrets
+                  key: github-client-id
+            - name: GITHUB_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: backstage-github-secrets
+                  key: github-client-secret
           livenessProbe:
             httpGet:
               path: /healthcheck
