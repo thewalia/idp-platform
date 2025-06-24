@@ -34,6 +34,8 @@ data:
         origin: http://localhost:7007
         methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
         credentials: true
+      auth:
+        dangerouslyDisableDefaultAuthPolicy: true
       database:
         client: pg
         connection:
@@ -101,12 +103,12 @@ data:
 
     auth:
       environment: development
+      providers:
+        guest:
+          dangerouslyAllowOutsideDevelopment: true
       session:
         secret: ${AUTH_SESSION_SECRET}
-      providers:
-        guest: {}
-        github: null
-        oauth2: null
+      skipAuthentication: true
 
     permission:
       enabled: false
