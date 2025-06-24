@@ -204,6 +204,10 @@ spec:
               containerPort: 7007
               protocol: TCP
           env:
+            - name: NODE_ENV
+              value: "development"
+            - name: BACKSTAGE_DISABLE_AUTH
+              value: "true"
             # Database configuration with SSL disabled
             - name: POSTGRES_HOST
               value: "backstage-postgresql"

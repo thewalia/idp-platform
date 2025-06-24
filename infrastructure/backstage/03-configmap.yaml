@@ -65,7 +65,7 @@ data:
       defaultCommitMessage: 'Initial commit from Backstage scaffolder'
 
     catalog:
-      readonly: true
+      readonly: false
       import:
         entityFilename: catalog-info.yaml
         pullRequestBranchName: backstage-integration
@@ -102,12 +102,11 @@ data:
     auth:
       environment: development
       providers:
-        github:
-          development:
-            clientId: ${GITHUB_CLIENT_ID}
-            clientSecret: ${GITHUB_CLIENT_SECRET}
-      session:
-        secret: ${AUTH_SESSION_SECRET}
+        guest:
+          dangerouslyAllowOutsideDevelopment: true
+
+    permission:
+      enabled: false
 
     proxy:
       '/argocd/api':
