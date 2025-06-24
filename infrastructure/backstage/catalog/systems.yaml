@@ -1,0 +1,8 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: demo-applications
+  description: Demo applications for IDP platform
+spec:
+  owner: group:default/platform-team
+  domain: platform

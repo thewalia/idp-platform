@@ -1,0 +1,72 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: simple-web-app
+  title: Simple Web Application
+  description: Create a lightweight web application with Nginx
+  tags:
+    - recommended
+    - web
+    - nginx
+spec:
+  owner: group:default/platform-team
+  type: website
+  parameters:
+    - title: Fill in some steps
+      required:
+        - name
+        - description
+      properties:
+        name:
+          title: Name
+          type: string
+          description: Unique name of the component
+          pattern: '^[a-z0-9-]+$'
+          ui:help: 'Use lowercase letters, numbers, and hyphens only'
+        description:
+          title: Description
+          type: string
+          description: Help others understand what this website is for
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the component
+          default: group:default/platform-team
+          enum:
+            - group:default/platform-team
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          owner: ${{ parameters.owner }}
+
+    - id: publish
+      name: Publish
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: This is ${{ parameters.name }}
+        repoUrl: github.com?repo=idp-platform&owner=theWalia
+        sourcePath: applications/demo-apps/${{ parameters.name }}
+        gitCommitMessage: 'Add ${{ parameters.name }} web app via Backstage'
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/${{ parameters.name }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: https://github.com/theWalia/idp-platform/tree/main/applications/demo-apps/${{ parameters.name }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}

@@ -31,8 +31,8 @@ metadata:
 spec:
   type: service
   lifecycle: experimental
-  owner: platform-team
-  system: demo-applications
+  owner: group:default/platform-team
+  system: system:default/demo-applications
   providesApis:
     - demo-nginx-api
   dependsOn:
@@ -47,8 +47,8 @@ metadata:
 spec:
   type: openapi
   lifecycle: experimental
-  owner: platform-team
-  system: demo-applications
+  owner: group:default/platform-team
+  system: system:default/demo-applications
   definition: |
     openapi: 3.0.0
     info:

@@ -70,10 +70,22 @@ data:
         entityFilename: catalog-info.yaml
         pullRequestBranchName: backstage-integration
       rules:
-        - allow: [Component, System, API, Resource, Location]
+        - allow: [Component, System, API, Resource, Location, Group, Template]
       locations:
         - type: url
           target: https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/demo-nginx/catalog-info.yaml
+        - type: url
+          target: https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/catalog/groups.yaml
+        - type: url
+          target: https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/catalog/systems.yaml
+        # Scaffolder templates
+        - type: url
+          target: https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/templates/simple-web-app/template.yaml
+        - type: url
+          target: https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/templates/simple-api-service/template.yaml
+        # Auto-discovery for generated apps
+        - type: github-discovery
+          target: https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/*/catalog-info.yaml
         
     kubernetes:
       serviceLocatorMethod:

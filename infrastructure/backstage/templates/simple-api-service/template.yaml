@@ -1,0 +1,80 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: simple-api-service
+  title: Simple API Service
+  description: Create a lightweight API service with health checks
+  tags:
+    - recommended
+    - api
+    - service
+spec:
+  owner: group:default/platform-team
+  type: service
+  parameters:
+    - title: Service Information
+      required:
+        - name
+        - description
+        - port
+      properties:
+        name:
+          title: Service Name
+          type: string
+          description: Name of the API service
+          pattern: '^[a-z0-9-]+$'
+          ui:help: 'Use lowercase letters, numbers, and hyphens only'
+        description:
+          title: Description
+          type: string
+          description: What does this API service do?
+        port:
+          title: Service Port
+          type: integer
+          description: Port for the API service
+          default: 8080
+          enum: [8080, 8081, 8082, 9000, 9001]
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the component
+          default: group:default/platform-team
+          enum:
+            - group:default/platform-team
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          name: ${{ parameters.name }}
+          description: ${{ parameters.description }}
+          port: ${{ parameters.port }}
+          owner: ${{ parameters.owner }}
+
+    - id: publish
+      name: Publish
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: This is ${{ parameters.name }}
+        repoUrl: github.com?repo=idp-platform&owner=theWalia
+        sourcePath: applications/demo-apps/${{ parameters.name }}
+        gitCommitMessage: 'Add ${{ parameters.name }} API service via Backstage'
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/${{ parameters.name }}
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: https://github.com/theWalia/idp-platform/tree/main/applications/demo-apps/${{ parameters.name }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}
