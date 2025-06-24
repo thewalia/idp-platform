@@ -72,7 +72,7 @@ data:
         - allow: [Component, System, API, Resource, Location]
       locations:
         - type: url
-          target: https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/*/catalog-info.yaml
+          target: https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/demo-nginx/catalog-info.yaml
         
     kubernetes:
       serviceLocatorMethod:
