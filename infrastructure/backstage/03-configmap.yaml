@@ -65,6 +65,7 @@ data:
       defaultCommitMessage: 'Initial commit from Backstage scaffolder'
 
     catalog:
+      readonly: true
       import:
         entityFilename: catalog-info.yaml
         pullRequestBranchName: backstage-integration
@@ -104,6 +105,8 @@ data:
         secret: ${AUTH_SESSION_SECRET}
       providers:
         guest: {}
+        github: null
+        oauth2: null
 
     permission:
       enabled: false
