@@ -208,7 +208,7 @@ spec:
               value: "development"
             - name: BACKSTAGE_DISABLE_AUTH
               value: "true"
-            # Database configuration with SSL disabled
+            # Database configuration
             - name: POSTGRES_HOST
               value: "backstage-postgresql"
             - name: POSTGRES_PORT
@@ -232,6 +232,9 @@ spec:
                 secretKeyRef:
                   name: backstage-github-secrets
                   key: github-token
+            # Skip missing processors check
+            - name: BACKSTAGE_CATALOG_SKIP_MISSING_PROCESSORS_CHECK
+              value: "true"
             # ArgoCD integration
             - name: ARGOCD_ADMIN_PASSWORD
               valueFrom:
