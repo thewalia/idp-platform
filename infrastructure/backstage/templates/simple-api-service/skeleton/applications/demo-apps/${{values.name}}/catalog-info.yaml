@@ -1,0 +1,77 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{values.name}}
+  title: ${{values.name | title}}
+  description: ${{values.description}}
+  annotations:
+    github.com/project-slug: theWalia/idp-platform
+    argocd/app-name: ${{values.name}}
+    argocd/app-namespace: argocd
+    backstage.io/kubernetes-namespace: ${{values.name}}
+    backstage.io/kubernetes-id: ${{values.name}}
+    prometheus.io/rule: ${{values.name}}
+    grafana/dashboard-selector: "app=${{values.name}}"
+  tags:
+    - api
+    - python
+    - rest
+    - database
+    - scaffolded
+    - backend
+  links:
+    - url: https://github.com/theWalia/idp-platform/tree/main/applications/demo-apps/${{values.name}}
+      title: Source Code
+      icon: github
+    - url: http://${{values.name}}-api.local/api/docs
+      title: API Documentation
+      icon: docs
+    - url: http://${{values.name}}-api.local/api/health
+      title: Health Check
+      icon: dashboard
+spec:
+  type: service
+  lifecycle: production
+  owner: ${{values.owner}}
+  system: idp-platform
+  dependsOn:
+    - component:vault-platform
+  providesApis:
+    - ${{values.name}}-api
+  consumesApis: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: ${{values.name}}-api
+  title: ${{values.name | title}} API
+  description: REST API for ${{values.description}}
+  tags:
+    - rest
+    - openapi
+spec:
+  type: openapi
+  lifecycle: production
+  owner: ${{values.owner}}
+  system: idp-platform
+  definition: |
+    openapi: 3.0.0
+    info:
+      title: ${{values.name | title}} API
+      version: 1.0.0
+      description: ${{values.description}}
+    servers:
+      - url: http://${{values.name}}-api.local/api
+    paths:
+      /health:
+        get:
+          summary: Health check
+          responses:
+            '200':
+              description: Service is healthy
+      /metrics:
+        get:
+          summary: Prometheus metrics
+          responses:
+            '200':
+              description: Metrics data

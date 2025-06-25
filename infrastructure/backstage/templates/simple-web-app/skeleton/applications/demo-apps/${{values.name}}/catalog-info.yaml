@@ -1,0 +1,37 @@
+# /infrastructure/backstage/templates/simple-web-app/skeleton/applications/demo-apps/${{values.name}}/catalog-info.yaml
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{values.name}}
+  title: ${{values.name | title}}
+  description: ${{values.description}}
+  annotations:
+    github.com/project-slug: theWalia/idp-platform
+    argocd/app-name: ${{values.name}}
+    argocd/app-namespace: argocd
+    backstage.io/kubernetes-namespace: ${{values.name}}
+    backstage.io/kubernetes-id: ${{values.name}}
+    prometheus.io/rule: ${{values.name}}
+    grafana/dashboard-selector: "app=${{values.name}}"
+  tags:
+    - web
+    - nginx
+    - static-content
+    - scaffolded
+    - frontend
+  links:
+    - url: https://github.com/theWalia/idp-platform/tree/main/applications/demo-apps/${{values.name}}
+      title: Source Code
+      icon: github
+    - url: http://${{values.name}}.local
+      title: Application
+      icon: web
+spec:
+  type: website
+  lifecycle: production
+  owner: ${{values.owner}}
+  system: idp-platform
+  dependsOn:
+    - component:vault-platform
+  providesApis: []
+  consumesApis: []

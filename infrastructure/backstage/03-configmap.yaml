@@ -87,7 +87,7 @@ data:
           target: https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/templates/simple-api-service/template.yaml
         # Auto-discovery for generated apps
         - type: github-discovery
-          target: https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/*/catalog-info.yaml
+          target: https://github.com/theWalia/idp-platform/blob/*/applications/demo-apps/*/catalog-info.yaml
         
     kubernetes:
       serviceLocatorMethod:

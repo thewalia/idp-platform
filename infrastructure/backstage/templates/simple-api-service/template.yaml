@@ -56,24 +56,27 @@ spec:
 
     - id: publish
       name: Publish
-      action: publish:github
+      action: publish:github:pull-request
       input:
-        description: This is ${{ parameters.name }}
+        description: 'Add ${{ parameters.name }} API service via Backstage scaffolder'
         repoUrl: github.com?repo=idp-platform&owner=theWalia
-        sourcePath: applications/demo-apps/${{ parameters.name }}
-        gitCommitMessage: 'Add ${{ parameters.name }} API service via Backstage'
+        branchName: 'backstage/new-service-${{ parameters.name }}'
+        title: 'feat: Add ${{ parameters.name }} API service'
+        gitCommitMessage: 'feat: add ${{ parameters.name }} API service via Backstage'
 
     - id: register
       name: Register
       action: catalog:register
       input:
-        repoContentsUrl: https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/${{ parameters.name }}
+        repoContentsUrl: 'https://github.com/theWalia/idp-platform/blob/backstage/new-service-${{ parameters.name }}/applications/demo-apps/${{ parameters.name }}'
         catalogInfoPath: '/catalog-info.yaml'
 
   output:
     links:
+      - title: Pull Request
+        url: ${{ steps.publish.output.remoteUrl }}
       - title: Repository
-        url: https://github.com/theWalia/idp-platform/tree/main/applications/demo-apps/${{ parameters.name }}
+        url: 'https://github.com/theWalia/idp-platform/tree/backstage/new-service-${{ parameters.name }}/applications/demo-apps/${{ parameters.name }}'
       - title: Open in catalog
         icon: catalog
         entityRef: ${{ steps.register.output.entityRef }}
