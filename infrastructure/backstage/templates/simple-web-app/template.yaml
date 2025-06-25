@@ -55,18 +55,9 @@ spec:
         branchName: 'backstage/new-service-${{ parameters.name }}'
         title: 'feat: Add ${{ parameters.name }} web application'
 
-    - id: register
-      name: Register
-      action: catalog:register
-      input:
-        repoContentsUrl: 'https://github.com/theWalia/idp-platform/blob/backstage/new-service-${{ parameters.name }}/applications/demo-apps/${{ parameters.name }}/catalog-info.yaml'
-
   output:
     links:
       - title: Pull Request
         url: ${{ steps['publish'].output.remoteUrl }}
       - title: Repository
         url: 'https://github.com/theWalia/idp-platform/tree/backstage/new-service-${{ parameters.name }}/applications/demo-apps/${{ parameters.name }}'
-      - title: Open in catalog
-        icon: catalog
-        entityRef: ${{ steps['register'].output.entityRef }}
