@@ -38,6 +38,11 @@ autoscaling:
   maxReplicas: 10
   targetCPUUtilizationPercentage: 80
 
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
 # Security context
 securityContext:
   runAsNonRoot: true
