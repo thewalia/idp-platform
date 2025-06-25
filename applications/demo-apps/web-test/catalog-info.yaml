@@ -1,0 +1,37 @@
+# /infrastructure/backstage/templates/simple-web-app/skeleton/applications/demo-apps/web-test/catalog-info.yaml
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: web-test
+  title: Web-test
+  description: test
+  annotations:
+    github.com/project-slug: theWalia/idp-platform
+    argocd/app-name: web-test
+    argocd/app-namespace: argocd
+    backstage.io/kubernetes-namespace: web-test
+    backstage.io/kubernetes-id: web-test
+    prometheus.io/rule: web-test
+    grafana/dashboard-selector: "app=web-test"
+  tags:
+    - web
+    - nginx
+    - static-content
+    - scaffolded
+    - frontend
+  links:
+    - url: https://github.com/theWalia/idp-platform/tree/main/applications/demo-apps/web-test
+      title: Source Code
+      icon: github
+    - url: http://web-test.local
+      title: Application
+      icon: web
+spec:
+  type: website
+  lifecycle: production
+  owner: group:default/platform-team
+  system: idp-platform
+  dependsOn:
+    - component:vault-platform
+  providesApis: []
+  consumesApis: []
