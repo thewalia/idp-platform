@@ -1,0 +1,86 @@
+image:
+  repository: nginxinc/nginx-unprivileged
+  tag: "1.25"
+  pullPolicy: IfNotPresent
+
+nameOverride: "web-test"
+fullnameOverride: "web-test"
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: web-test.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 101
+  runAsGroup: 101
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+# Pod Security Standards
+podSecurityContext:
+  automountServiceAccountToken: false
+  fsGroup: 101
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# Monitoring
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /metrics
+
+# External Secrets
+externalSecrets:
+  enabled: true
+  secretStore: vault-secret-store
+  vaultPath: "demo-apps"
+  secrets:
+    config:
+      key: "web-test/config"
+    creds:
+      key: "web-test/creds"
+
+# App-specific config
+app:
+  environment: production
+  logLevel: info
+  features:
+    - static-content
+    - health-checks
+    - metrics
