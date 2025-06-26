@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: web-test
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  labels:
+    app.kubernetes.io/name: web-test
+    app.kubernetes.io/part-of: idp-platform
+    backstage.io/managed-by: scaffolder
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/theWalia/idp-platform
+    targetRevision: HEAD
+    path: applications/demo-apps/web-test
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: web-test
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m0s
+  ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: web-test-config
+      jsonPointers:
+        - /data
+    - group: ""
+      kind: Secret
+      name: web-test-creds
+      jsonPointers:
+        - /data
