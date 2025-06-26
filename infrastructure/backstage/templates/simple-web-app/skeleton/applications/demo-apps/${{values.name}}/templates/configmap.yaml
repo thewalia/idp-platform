@@ -9,7 +9,7 @@ data:
         listen 8080;
         server_name localhost;
         location / {
-            root /usr/share/nginx/html;
+            root /etc/nginx/conf.d;
             index index.html;
         }
         location /health {
