@@ -1,0 +1,15 @@
+apiVersion: v2
+name: web-test
+description: test backstage
+version: 0.1.0
+appVersion: "1.0.0"
+type: application
+keywords:
+  - web
+  - nginx
+  - scaffolded
+maintainers:
+  - name: IDP Platform Team
+    email: idp@example.com
+sources:
+  - https://github.com/theWalia/idp-platform
