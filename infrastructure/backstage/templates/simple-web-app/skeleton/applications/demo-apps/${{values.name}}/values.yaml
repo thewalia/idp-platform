@@ -73,7 +73,7 @@ monitoring:
 
 # External Secrets
 externalSecrets:
-  enabled: true
+  enabled: false
   configSecretName: ${{values.name}}-config-secret
   credsSecretName: ${{values.name}}-creds-secret
 
