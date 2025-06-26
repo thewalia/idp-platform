@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "demo-nginx.fullname" . }}
+  name: {{ include "${{values.name}}.fullname" . }}
   labels:
-    {{- include "demo-nginx.labels" . | nindent 4 }}
+    {{- include "${{values.name}}.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "demo-nginx.selectorLabels" . | nindent 6 }}
+      {{- include "${{values.name}}.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -19,7 +19,7 @@ spec:
         secret-rotation-trigger: "v1" # manual trigger
         {{- end }}
       labels:
-        {{- include "demo-nginx.selectorLabels" . | nindent 8 }}
+        {{- include "${{values.name}}.selectorLabels" . | nindent 8 }}
     spec:
       {{- if .Values.serviceAccount.name }}
       serviceAccountName: {{ .Values.serviceAccount.name }}
@@ -97,7 +97,7 @@ spec:
       volumes:
       - name: nginx-config
         configMap:
-          name: {{ include "demo-nginx.fullname" . }}-config
+          name: {{ include "${{values.name}}.fullname" . }}-config
       - name: tmp-volume
         emptyDir: {}
       - name: var-cache-nginx
