@@ -1,52 +1,27 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "demo-nginx.fullname" . }}-config
-  labels:
-    {{- include "demo-nginx.labels" . | nindent 4 }}
+  name: {{ include "${{values.name}}.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
 data:
   default.conf: |
     server {
         listen 8080;
         server_name localhost;
-        
         location / {
             root /usr/share/nginx/html;
-            index index.html index.htm;
+            index index.html;
         }
-        
-        # Health check endpoint
-        location /health {
-            access_log off;
-            return 200 "healthy\n";
-            add_header Content-Type text/plain;
+        location /api/health {
+            return 200 '{"status":"healthy","service":"${{values.name}}","timestamp":"'"$(date -Iseconds)"'"}';
+            add_header Content-Type application/json;
         }
-        
-        # Custom page to verify deployment
-        location /info {
-            access_log off;
-            return 200 "IDP Demo App - Phase 2 Complete! Vault + ESO Integration Active\n";
-            add_header Content-Type text/plain;
+        location /api/users {
+            return 200 '{"users":[{"id":1,"name":"John"},{"id":2,"name":"Jane"}],"service":"${{values.name}}"}';
+            add_header Content-Type application/json;
         }
-        
-        # Secrets info endpoint (for demo purposes)
-        location /secrets-info {
-            access_log off;
-            return 200 "Secrets loaded from Vault via ESO. Check environment variables and /etc/secrets/ for details.\n";
-            add_header Content-Type text/plain;
-        }
-        
-        # Environment info (shows env vars without exposing values)
-        location /env-info {
-            access_log off;
-            return 200 "Environment variables loaded: API_KEY, DATABASE_URL, DEBUG_MODE, USERNAME, PASSWORD\nSecret files mounted at: /etc/secrets/\n";
-            add_header Content-Type text/plain;
-        }
-
-        # Vault connection test endpoint
-        location /vault-status {
-            access_log off;
-            return 200 "Vault Integration Status:\n- SecretStore: vault-backend\n- Namespace: demo-apps\n- Auth Method: kubernetes\n- Secrets: Auto-synced every 30s\n";
-            add_header Content-Type text/plain;
+        location /api/stats {
+            return 200 '{"connections":42,"uptime":"'"$(uptime -p)"'","service":"${{values.name}}"}';
+            add_header Content-Type application/json;
         }
     }

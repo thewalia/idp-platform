@@ -70,22 +70,12 @@ monitoring:
     interval: 30s
     path: /metrics
 
-secrets:
-  config:
-    name: "${{values.name}}-config"
-  creds:
-    name: "${{values.name}}-creds"
 
 # External Secrets
 externalSecrets:
   enabled: true
-  secretStore: vault-secret-store
-  vaultPath: "demo-apps"
-  secrets:
-    config:
-      key: "${{values.name}}/config"
-    creds:
-      key: "${{values.name}}/creds"
+  configSecretName: ${{values.name}}-config-secret
+  credsSecretName: ${{values.name}}-creds-secret
 
 # App-specific config
 app:
