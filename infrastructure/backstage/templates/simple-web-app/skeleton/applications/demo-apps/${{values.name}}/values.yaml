@@ -70,6 +70,12 @@ monitoring:
     interval: 30s
     path: /metrics
 
+secrets:
+  config:
+    name: "${{values.name}}-config"
+  creds:
+    name: "${{values.name}}-creds"
+
 # External Secrets
 externalSecrets:
   enabled: true
