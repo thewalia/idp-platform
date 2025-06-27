@@ -71,13 +71,6 @@ data:
       import:
         entityFilename: catalog-info.yaml
         pullRequestBranchName: backstage-integration
-      processors:
-        githubOrg:
-          providers:
-            - target: https://github.com
-              token: ${GITHUB_TOKEN}
-        github:
-          validateLocationsExist: true
       rules:
         - allow: [Component, System, API, Resource, Location, Group, Template]
       locations:
