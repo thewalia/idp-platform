@@ -73,6 +73,16 @@ data:
         pullRequestBranchName: backstage-integration
       rules:
         - allow: [Component, System, API, Resource, Location, Group, Template]
+      providers:
+        github:
+          providerId:
+            organization: 'theWalia'
+            catalogPath: '/applications/demo-apps/*/catalog-info.yaml'
+            filters:
+              repository: 'idp-platform'
+            schedule:
+              frequency: { minutes: 5 }
+              timeout: { minutes: 2 }
       locations:
         - type: url
           target: https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/demo-nginx/catalog-info.yaml
@@ -89,13 +99,7 @@ data:
         - type: url
           target: https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/templates/simple-api-service/template.yaml
         # Auto-discovery for generated apps
-        - type: github-org
-          target: https://github.com/theWalia
-          rules:
-            - allow: [Component, System, API, Resource]
-          schedule:
-            frequency: { minutes: 5 }
-            timeout: { minutes: 2 }
+
     kubernetes:
       serviceLocatorMethod:
         type: 'multiTenant'
