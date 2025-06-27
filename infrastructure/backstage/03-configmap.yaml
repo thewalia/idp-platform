@@ -71,6 +71,13 @@ data:
       import:
         entityFilename: catalog-info.yaml
         pullRequestBranchName: backstage-integration
+      processors:
+        githubOrg:
+          providers:
+            - target: https://github.com
+              token: ${GITHUB_TOKEN}
+        github:
+          validateLocationsExist: true
       rules:
         - allow: [Component, System, API, Resource, Location, Group, Template]
       locations:
@@ -87,7 +94,10 @@ data:
           target: https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/templates/simple-api-service/template.yaml
         # Auto-discovery for generated apps
         - type: github-discovery
-          target: https://github.com/theWalia/idp-platform/blob/*/applications/demo-apps/*/catalog-info.yaml
+          target: https://github.com/theWalia/idp-platform/tree/main/applications/demo-apps
+          schedule:
+            frequency: { minutes: 5 }
+            timeout: { minutes: 2 }
         
     kubernetes:
       serviceLocatorMethod:
