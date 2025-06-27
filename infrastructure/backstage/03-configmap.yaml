@@ -76,6 +76,9 @@ data:
       locations:
         - type: url
           target: https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/demo-nginx/catalog-info.yaml
+        # Manual test for the new service
+        - type: url
+          target: https://github.com/theWalia/idp-platform/blob/main/applications/demo-apps/web-test/catalog-info.yaml
         - type: url
           target: https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/catalog/groups.yaml
         - type: url
@@ -86,12 +89,13 @@ data:
         - type: url
           target: https://github.com/theWalia/idp-platform/blob/main/infrastructure/backstage/templates/simple-api-service/template.yaml
         # Auto-discovery for generated apps
-        - type: github-discovery
-          target: https://github.com/theWalia/idp-platform/tree/main/applications/demo-apps
+        - type: github-org
+          target: https://github.com/theWalia
+          rules:
+            - allow: [Component, System, API, Resource]
           schedule:
             frequency: { minutes: 5 }
             timeout: { minutes: 2 }
-        
     kubernetes:
       serviceLocatorMethod:
         type: 'multiTenant'
