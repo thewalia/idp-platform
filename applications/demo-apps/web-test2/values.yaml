@@ -1,0 +1,87 @@
+image:
+  repository: nginxinc/nginx-unprivileged
+  tag: "1.25"
+  pullPolicy: IfNotPresent
+
+nameOverride: "web-test2"
+fullnameOverride: "web-test2"
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: web-test2.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# Security context
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 101
+  runAsGroup: 101
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+# Pod Security Standards
+podSecurityContext:
+  automountServiceAccountToken: false
+  fsGroup: 101
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# Monitoring
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    path: /metrics
+
+
+# External Secrets
+externalSecrets:
+  enabled: false
+  configSecretName: web-test2-config-secret
+  credsSecretName: web-test2-creds-secret
+
+# App-specific config
+app:
+  environment: production
+  logLevel: info
+  features:
+    - static-content
+    - health-checks
+    - metrics
