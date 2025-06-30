@@ -39,6 +39,11 @@ autoscaling:
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
 
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
 # Security context - more restrictive for API services
 securityContext:
   runAsNonRoot: true
