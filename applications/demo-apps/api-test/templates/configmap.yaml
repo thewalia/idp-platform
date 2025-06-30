@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "api-test.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+data:
+  default.conf: |
+    server {
+        listen 8080;
+        server_name localhost;
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+        location /api/health {
+            return 200 '{"status":"healthy","service":"api-test","timestamp":"'"$(date -Iseconds)"'"}';
+            add_header Content-Type application/json;
+        }
+        location /api/users {
+            return 200 '{"users":[{"id":1,"name":"John"},{"id":2,"name":"Jane"}],"service":"api-test"}';
+            add_header Content-Type application/json;
+        }
+        location /api/stats {
+            return 200 '{"connections":42,"uptime":"'"$(uptime -p)"'","service":"api-test"}';
+            add_header Content-Type application/json;
+        }
+    }
