@@ -71,7 +71,7 @@ monitoring:
 
 # External Secrets
 externalSecrets:
-  enabled: true
+  enabled: false
   secretStore: vault-secret-store
   vaultPath: "demo-apps"
   secrets:
