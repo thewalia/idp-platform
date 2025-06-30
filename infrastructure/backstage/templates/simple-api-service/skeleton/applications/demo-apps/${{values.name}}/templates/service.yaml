@@ -4,10 +4,10 @@ metadata:
   name: {{ include "${{values.name}}.fullname" . }}
   labels:
     {{- include "${{values.name}}.labels" . | nindent 4 }}
-annotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/port: {{ .Values.service.port }}
-  prometheus.io/path: "/metrics"
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ .Values.service.port }}"
+    prometheus.io/path: "/metrics"
 spec:
   type: {{ .Values.service.type }}
   ports:

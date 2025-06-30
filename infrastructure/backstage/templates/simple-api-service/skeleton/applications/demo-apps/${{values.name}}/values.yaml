@@ -1,6 +1,6 @@
 image:
   repository: python
-  tag: "3.11-alpine"
+  tag: "3.11-slim"
   pullPolicy: IfNotPresent
 
 nameOverride: "${{values.name}}"
@@ -20,7 +20,7 @@ ingress:
   hosts:
     - host: ${{values.name}}-api.local
       paths:
-        - path: /api
+        - path: /
           pathType: Prefix
   tls: []
 
@@ -61,6 +61,7 @@ podSecurityContext:
   runAsNonRoot: true
   seccompProfile:
     type: RuntimeDefault
+  automountServiceAccountToken: false
 
 # Monitoring - enhanced for API services
 monitoring:
@@ -79,13 +80,8 @@ externalSecrets:
   enabled: false
   secretStore: vault-secret-store
   vaultPath: "demo-apps"
-  secrets:
-    config:
-      key: "${{values.name}}/config"
-    creds:
-      key: "${{values.name}}/creds"
-    database:
-      key: "${{values.name}}/database"
+  configSecretName: "${{values.name}}-config"
+  credsSecretName: "${{values.name}}-creds"
 
 # API-specific config
 api:

@@ -3,25 +3,29 @@ kind: ConfigMap
 metadata:
   name: {{ include "${{values.name}}.fullname" . }}-config
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "${{values.name}}.labels" . | nindent 4 }}
 data:
-  default.conf: |
-    server {
-        listen 8080;
-        server_name localhost;
-        location / {
-            root /usr/share/nginx/html;
-            index index.html;
-        }
-        location /api/health {
-            return 200 '{"status":"healthy","service":"${{values.name}}","timestamp":"'"$(date -Iseconds)"'"}';
-            add_header Content-Type application/json;
-        }
-        location /api/users {
-            return 200 '{"users":[{"id":1,"name":"John"},{"id":2,"name":"Jane"}],"service":"${{values.name}}"}';
-            add_header Content-Type application/json;
-        }
-        location /api/stats {
-            return 200 '{"connections":42,"uptime":"'"$(uptime -p)"'","service":"${{values.name}}"}';
-            add_header Content-Type application/json;
-        }
-    }
+  app.py: |
+{{ .Files.Get "app.py" | indent 4 }}
+  requirements.txt: |
+{{ .Files.Get "requirements.txt" | indent 4 }}
+  startup.sh: |
+    #!/bin/bash
+    set -e
+    
+    echo "Starting ${{values.name}} API service..."
+    echo "Installing Python dependencies..."
+    
+    # Install dependencies
+    pip install --no-cache-dir -r /app/requirements.txt
+    
+    # Set environment variables
+    export SERVICE_NAME="${{values.name}}"
+    export API_PORT="${{values.port}}"
+    export ENVIRONMENT="production"
+    export LOG_LEVEL="info"
+    
+    # Start the application
+    echo "Starting Flask application on port ${{values.port}}..."
+    cd /app && python app.py
