@@ -1,0 +1,102 @@
+image:
+  repository: python
+  tag: "3.11-alpine"
+  pullPolicy: IfNotPresent
+
+nameOverride: "api-test"
+fullnameOverride: "api-test"
+
+replicaCount: 3
+
+service:
+  type: ClusterIP
+  port: 8081
+  targetPort: 8081
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: api-test-api.local
+      paths:
+        - path: /api
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Security context - more restrictive for API services
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+
+# Pod Security Standards
+podSecurityContext:
+  fsGroup: 1001
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# Monitoring - enhanced for API services
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 15s
+    path: /metrics
+  alerts:
+    enabled: true
+    errorRateThreshold: 5
+    latencyThreshold: 500
+
+# External Secrets
+externalSecrets:
+  enabled: false
+  secretStore: vault-secret-store
+  vaultPath: "demo-apps"
+  secrets:
+    config:
+      key: "api-test/config"
+    creds:
+      key: "api-test/creds"
+    database:
+      key: "api-test/database"
+
+# API-specific config
+api:
+  port: 8081
+  environment: production
+  logLevel: info
+  rateLimit:
+    enabled: true
+    requests: 100
+    windowMs: 60000
+  database:
+    enabled: true
+    type: postgresql
+  features:
+    - rest-api
+    - health-checks
+    - metrics
+    - rate-limiting
+    - database-integration
