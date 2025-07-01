@@ -33,7 +33,7 @@ data:
     echo "Installing Python dependencies..."
     
     # Install dependencies
-    pip install --user --no-cache-dir --target /tmp/pip-packages -r requirements.txt
+    pip install --no-cache-dir --target /tmp/pip-packages -r requirements.txt
     
     # Add the packages to Python path
     export PYTHONPATH="/tmp/pip-packages:$PYTHONPATH"
