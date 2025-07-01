@@ -15,12 +15,20 @@ data:
     set -e
     
     echo "Starting ${{values.name}} API service..."
+    echo "Debug: Checking /app-src contents:"
+    ls -la /app-src/ || echo "No /app-src directory"
+
     echo "Creating writable directory..."
 
     # Create writable directory for user
     mkdir -p /tmp/app
-    cp -r /app-src/* /tmp/app/
+    cp /app-src/app.py /tmp/app/
+    cp /app-src/requirements.txt /tmp/app/
+    cp /app-src/startup.sh /tmp/app/ 2>/dev/null || true
     cd /tmp/app
+
+    echo "Contents of /tmp/app:"
+    ls -la /tmp/app/
 
     echo "Installing Python dependencies..."
     
