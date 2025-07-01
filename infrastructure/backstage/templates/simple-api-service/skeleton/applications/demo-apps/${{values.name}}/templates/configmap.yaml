@@ -33,8 +33,11 @@ data:
     echo "Installing Python dependencies..."
     
     # Install dependencies
-    pip install --user --no-cache-dir -r requirements.txt
+    pip install --user --no-cache-dir --target /tmp/pip-packages -r requirements.txt
     
+    # Add the packages to Python path
+    export PYTHONPATH="/tmp/pip-packages:$PYTHONPATH"
+
     # Set environment variables
     export SERVICE_NAME="${{values.name}}"
     export API_PORT="${{values.port}}"

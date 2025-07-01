@@ -102,6 +102,8 @@ spec:
           readOnly: true
         - name: tmp-volume
           mountPath: /tmp
+        - name: pip-packages
+          mountPath: /tmp/pip-packages
         {{- if .Values.externalSecrets.enabled }}
         - name: secret-files
           mountPath: /etc/secrets
@@ -124,6 +126,8 @@ spec:
           - key: startup.sh
             path: startup.sh
       - name: tmp-volume
+        emptyDir: {}
+      - name: pip-packages
         emptyDir: {}
       {{- if .Values.externalSecrets.enabled }}
       - name: secret-files
