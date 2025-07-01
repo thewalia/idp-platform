@@ -1,0 +1,77 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: api-test
+  title: Api-test
+  description: backstage test
+  annotations:
+    github.com/project-slug: theWalia/idp-platform
+    argocd/app-name: api-test
+    argocd/app-namespace: argocd
+    backstage.io/kubernetes-namespace: api-test
+    backstage.io/kubernetes-id: api-test
+    prometheus.io/rule: api-test
+    grafana/dashboard-selector: "app=api-test"
+  tags:
+    - api
+    - python
+    - rest
+    - database
+    - scaffolded
+    - backend
+  links:
+    - url: https://github.com/theWalia/idp-platform/tree/main/applications/demo-apps/api-test
+      title: Source Code
+      icon: github
+    - url: http://api-test-api.local/api/docs
+      title: API Documentation
+      icon: docs
+    - url: http://api-test-api.local/api/health
+      title: Health Check
+      icon: dashboard
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/platform-team
+  system: idp-platform
+  dependsOn:
+    - component:vault-platform
+  providesApis:
+    - api-test-api
+  consumesApis: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: api-test-api
+  title: Api-test API
+  description: REST API for backstage test
+  tags:
+    - rest
+    - openapi
+spec:
+  type: openapi
+  lifecycle: production
+  owner: group:default/platform-team
+  system: idp-platform
+  definition: |
+    openapi: 3.0.0
+    info:
+      title: Api-test API
+      version: 1.0.0
+      description: backstage test
+    servers:
+      - url: http://api-test-api.local/api
+    paths:
+      /health:
+        get:
+          summary: Health check
+          responses:
+            '200':
+              description: Service is healthy
+      /metrics:
+        get:
+          summary: Prometheus metrics
+          responses:
+            '200':
+              description: Metrics data
