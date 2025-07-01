@@ -47,8 +47,8 @@ serviceAccount:
 # Security context - more restrictive for API services
 securityContext:
   runAsNonRoot: true
-  runAsUser: 1001
-  runAsGroup: 1001
+  runAsUser: 1000
+  runAsGroup: 1000
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   capabilities:
@@ -57,7 +57,7 @@ securityContext:
 
 # Pod Security Standards
 podSecurityContext:
-  fsGroup: 1001
+  fsGroup: 1000
   runAsNonRoot: true
   seccompProfile:
     type: RuntimeDefault

@@ -7,18 +7,25 @@ metadata:
     {{- include "${{values.name}}.labels" . | nindent 4 }}
 data:
   app.py: |
-{{ .Files.Get "app.py" | indent 4 }}
+{{ .Files.Get "files/app.py" | indent 4 }}
   requirements.txt: |
-{{ .Files.Get "requirements.txt" | indent 4 }}
+{{ .Files.Get "files/requirements.txt" | indent 4 }}
   startup.sh: |
     #!/bin/bash
     set -e
     
     echo "Starting ${{values.name}} API service..."
+    echo "Creating writable directory..."
+
+    # Create writable directory for user
+    mkdir -p /tmp/app
+    cp -r /app-src/* /tmp/app/
+    cd /tmp/app
+
     echo "Installing Python dependencies..."
     
     # Install dependencies
-    pip install --no-cache-dir -r /app/requirements.txt
+    pip install --user --no-cache-dir -r requirements.txt
     
     # Set environment variables
     export SERVICE_NAME="${{values.name}}"
@@ -28,4 +35,4 @@ data:
     
     # Start the application
     echo "Starting Flask application on port ${{values.port}}..."
-    cd /app && python app.py
+    python app.py
