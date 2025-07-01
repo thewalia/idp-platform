@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "api-test.fullname" . }}
+  labels:
+    {{- include "api-test.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "api-test.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        # Config checksum for auto-reloading
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        # Secrets checksum for secret rotation
+        {{- if .Values.externalSecrets.enabled }}
+        secret-rotation-trigger: "v1" # manual trigger
+        {{- end }}
+      labels:
+        {{- include "api-test.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "api-test.fullname" . }}
+      {{- end }}
+      automountServiceAccountToken: {{ .Values.podSecurityContext.automountServiceAccountToken | default false }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["/bin/bash"]
+        args: ["/app/startup.sh"]
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.targetPort }}
+          protocol: TCP
+        env:
+        - name: SERVICE_NAME
+          value: "api-test"
+        - name: API_PORT
+          value: "{{ .Values.service.targetPort }}"
+        - name: ENVIRONMENT
+          value: "{{ .Values.api.environment | default "production" }}"
+        - name: LOG_LEVEL
+          value: "{{ .Values.api.logLevel | default "info" }}"
+        {{- if .Values.externalSecrets.enabled }}
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecrets.configSecretName }}
+              key: API_KEY
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecrets.configSecretName }}
+              key: DATABASE_URL
+        - name: DEBUG_MODE
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecrets.configSecretName }}
+              key: DEBUG_MODE
+        - name: USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecrets.credsSecretName }}
+              key: USERNAME
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.externalSecrets.credsSecretName }}
+              key: PASSWORD
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 45
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+        volumeMounts:
+        - name: app-config
+          mountPath: /app-src
+          readOnly: true
+        - name: app-startup
+          mountPath: /app
+          readOnly: true
+        - name: tmp-volume
+          mountPath: /tmp
+        - name: pip-packages
+          mountPath: /tmp/pip-packages
+        {{- if .Values.externalSecrets.enabled }}
+        - name: secret-files
+          mountPath: /etc/secrets
+          readOnly: true
+        {{- end }}
+      volumes:
+      - name: app-config
+        configMap:
+          name: {{ include "api-test.fullname" . }}-config
+          items:
+          - key: app.py
+            path: app.py
+          - key: requirements.txt
+            path: requirements.txt
+      - name: app-startup
+        configMap:
+          name: {{ include "api-test.fullname" . }}-config
+          defaultMode: 0755
+          items:
+          - key: startup.sh
+            path: startup.sh
+      - name: tmp-volume
+        emptyDir: {}
+      - name: pip-packages
+        emptyDir: {}
+      {{- if .Values.externalSecrets.enabled }}
+      - name: secret-files
+        projected:
+          sources:
+          - secret:
+              name: {{ .Values.externalSecrets.configSecretName }}
+          - secret:
+              name: {{ .Values.externalSecrets.credsSecretName }}
+      {{- end }}
