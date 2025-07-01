@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "api-test.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "api-test.labels" . | nindent 4 }}
+data:
+  app.py: |
+{{ .Files.Get "files/app.py" | indent 4 }}
+  requirements.txt: |
+{{ .Files.Get "files/requirements.txt" | indent 4 }}
+  startup.sh: |
+    #!/bin/bash
+    set -e
+    
+    echo "Starting api-test API service..."
+    echo "Debug: Checking /app-src contents:"
+    ls -la /app-src/ || echo "No /app-src directory"
+
+    echo "Creating writable directory..."
+
+    # Create writable directory for user
+    mkdir -p /tmp/app
+    cp /app-src/app.py /tmp/app/
+    cp /app-src/requirements.txt /tmp/app/
+    cp /app-src/startup.sh /tmp/app/ 2>/dev/null || true
+    cd /tmp/app
+
+    echo "Contents of /tmp/app:"
+    ls -la /tmp/app/
+
+    echo "Installing Python dependencies..."
+    
+    # Install dependencies
+    pip install --no-cache-dir --target /tmp/pip-packages -r requirements.txt
+    
+    # Add the packages to Python path
+    export PYTHONPATH="/tmp/pip-packages:$PYTHONPATH"
+
+    # Set environment variables
+    export SERVICE_NAME="api-test"
+    export API_PORT="8081"
+    export ENVIRONMENT="production"
+    export LOG_LEVEL="info"
+    
+    # Start the application
+    echo "Starting Flask application on port 8081..."
+    python app.py
