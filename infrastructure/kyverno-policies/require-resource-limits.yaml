@@ -1,20 +1,20 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: disallow-latest-tag
+  name: require-resource-limits
   annotations:
-    policies.kyverno.io/title: Disallow Latest Tag
-    policies.kyverno.io/category: Best Practices
-    policies.kyverno.io/severity: medium
+    policies.kyverno.io/title: Require Resource Limits
+    policies.kyverno.io/category: Resource Management
+    policies.kyverno.io/severity: high
     policies.kyverno.io/subject: Pod
     policies.kyverno.io/description: >-
-      Disallows container images with latest tag for better version control and security.
-      Images should use specific tags or digests for reproducible deployments.
+      Requires all containers to have CPU and memory limits defined to prevent resource exhaustion.
+      This ensures predictable resource usage and cluster stability.
 spec:
-  validationFailureAction: audit  # Start with audit mode
-  background: true
+  validationFailureAction: audit
+  background: false
   rules:
-  - name: check-image-tag
+  - name: check-resource-limits
     match:
       any:
       - resources:
@@ -22,6 +22,7 @@ spec:
           - Pod
     exclude:
       any:
+      # Exclude all system namespaces
       - resources:
           namespaces:
           - kube-system
@@ -34,19 +35,19 @@ spec:
           - monitoring
           - loki
           - kyverno
+      # Exclude system pods
       - resources:
           namespaces:
           - default
           names:
           - "install-*"
-      - resources:
-          names:
-          - "*test*"
-          - "*dev*"
     validate:
-      message: "Container images should not use 'latest' tag. Use specific version tags instead."
+      message: "All containers must have CPU and memory limits defined"
       pattern:
         spec:
           containers:
           - name: "?*"
-            image: "!*:latest | !*latest"
+            resources:
+              limits:
+                cpu: "?*"
+                memory: "?*"

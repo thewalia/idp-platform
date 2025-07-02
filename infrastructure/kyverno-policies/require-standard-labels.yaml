@@ -34,10 +34,17 @@ spec:
           - kube-public
           - kube-node-lease
           - argocd
+          - cert-manager
+          - external-secrets-system
           - vault
           - monitoring
-          - logging
+          - loki
           - kyverno
+      - resources:
+          namespaces:
+          - default
+          names:
+          - "install-*"
     validate:
       message: "Standard labels are required for better observability"
       pattern:

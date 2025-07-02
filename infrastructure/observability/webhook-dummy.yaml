@@ -5,6 +5,9 @@ metadata:
   namespace: monitoring
   labels:
     app: webhook-dummy
+    app.kubernetes.io/name: "webhook-dummy"
+    app.kubernetes.io/version: "1.0"
+    app.kubernetes.io/component: "webhook-receiver"
 spec:
   replicas: 1
   selector:
@@ -20,7 +23,7 @@ spec:
         runAsUser: 65534
       containers:
       - name: webhook-dummy
-        image: hashicorp/http-echo:latest
+        image: hashicorp/http-echo:1.0
         args:
           - -listen=:8080
           - -text=Webhook received from AlertManager at $(date)

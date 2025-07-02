@@ -28,12 +28,11 @@ metadata:
     app.kubernetes.io/name: backstage
     app.kubernetes.io/instance: backstage
     app.kubernetes.io/part-of: idp-platform
+    app.kubernetes.io/component: "developer-portal"
+    app.kubernetes.io/version: "1.39.0"
   annotations:
     # Kyverno policy exception for hostPath volume
-    policies.kyverno.io/last-applied-patches: |
-      - name: disallow-host-path
-        action: skip
-        message: "Backstage cache requires hostPath for performance"
+    kyverno.io/ignore: "disallow-host-path"
 spec:
   replicas: 1
   strategy:
@@ -55,10 +54,7 @@ spec:
         # Force restart on config change
         checksum/config: "{{ include (print $.Template.BasePath \"/03-configmap.yaml\") . | sha256sum }}"
         # Kyverno policy exception for hostPath volume
-        policies.kyverno.io/last-applied-patches: |
-          - name: disallow-host-path
-            action: skip
-            message: "Backstage cache requires hostPath for performance"
+        kyverno.io/ignore: "disallow-host-path"
     spec:
       securityContext:
         fsGroup: 1000
@@ -72,7 +68,7 @@ spec:
       initContainers:
         # Copy app files with correct ownership using fsGroup
         - name: copy-app-files
-          image: ghcr.io/backstage/backstage:latest
+          image: ghcr.io/backstage/backstage:1.39.0
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
@@ -186,7 +182,7 @@ spec:
               mountPath: /tmp
       containers:
         - name: backstage
-          image: ghcr.io/backstage/backstage:latest
+          image: ghcr.io/backstage/backstage:1.39.0
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
