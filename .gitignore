@@ -37,3 +37,6 @@ charts/*.tgz
 vault-keys.json
 vault-root-token
 .vault-token
+
+# script outputs
+scripts/*/*.txt
