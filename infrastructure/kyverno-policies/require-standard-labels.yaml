@@ -12,7 +12,7 @@ metadata:
       This policy enforces the presence of app.kubernetes.io labels on new workloads.
 spec:
   validationFailureAction: audit  # Start with audit mode
-  background: true
+  background: false
   rules:
   - name: check-app-labels
     match:
