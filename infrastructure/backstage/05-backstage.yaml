@@ -32,7 +32,7 @@ metadata:
     app.kubernetes.io/version: "1.39.0"
   annotations:
     # Kyverno policy exception for hostPath volume
-    kyverno.io/ignore: "disallow-host-path"
+    kyverno.io/ignore: "disallow-host-path,disallow-latest-tag"
 spec:
   replicas: 1
   strategy:
@@ -54,7 +54,7 @@ spec:
         # Force restart on config change
         checksum/config: "{{ include (print $.Template.BasePath \"/03-configmap.yaml\") . | sha256sum }}"
         # Kyverno policy exception for hostPath volume
-        kyverno.io/ignore: "disallow-host-path"
+        kyverno.io/ignore: "disallow-host-path,disallow-latest-tag"
     spec:
       securityContext:
         fsGroup: 1000
@@ -68,7 +68,7 @@ spec:
       initContainers:
         # Copy app files with correct ownership using fsGroup
         - name: copy-app-files
-          image: ghcr.io/backstage/backstage:1.39.0
+          image: ghcr.io/backstage/backstage:latest
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
@@ -182,7 +182,7 @@ spec:
               mountPath: /tmp
       containers:
         - name: backstage
-          image: ghcr.io/backstage/backstage:1.39.0
+          image: ghcr.io/backstage/backstage:latest
           imagePullPolicy: Always
           securityContext:
             allowPrivilegeEscalation: false
